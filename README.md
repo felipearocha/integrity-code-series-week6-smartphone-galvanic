@@ -2,7 +2,7 @@
 # Multi-Scale Galvanic Corrosion in Smartphone Charging Ports
 # Dissimilar Metal Electrochemistry with Inverse Parameter Estimation
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20172479.svg)](https://doi.org/10.5281/zenodo.20172479)
 
 ## Integrity Code Series
 
@@ -209,7 +209,7 @@ If this software contributes to your work, please cite both the software (this r
 
 **Software (archived release):**
 
-> Rocha, F. (2026). *Integrity Code Series - Week 6 - Multi-Scale Galvanic Corrosion in Smartphone Charging Ports* (Version 1.0.1) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.XXXXXXX
+> Rocha, F. (2026). *Integrity Code Series - Week 6 - Multi-Scale Galvanic Corrosion in Smartphone Charging Ports* (Version 1.0.1) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.20172479
 
 **BibTeX:**
 
@@ -220,8 +220,8 @@ If this software contributes to your work, please cite both the software (this r
   year         = 2026,
   publisher    = {Zenodo},
   version      = {v1.0.1},
-  doi          = {10.5281/zenodo.XXXXXXX},
-  url          = {https://doi.org/10.5281/zenodo.XXXXXXX}
+  doi          = {10.5281/zenodo.20172479},
+  url          = {https://doi.org/10.5281/zenodo.20172479}
 }
 ```
 
@@ -229,8 +229,8 @@ The two DOIs Zenodo provides are:
 
 | DOI                                  | What it points to                                                  |
 |--------------------------------------|--------------------------------------------------------------------|
-| `10.5281/zenodo.XXXXXXX` (concept)   | Always resolves to the latest version - use this for citation.     |
-| `10.5281/zenodo.YYYYYYY` (version)   | Pinned to v1.0.1 specifically - use when reproducibility matters.  |
+| `10.5281/zenodo.20172479` (concept)   | Always resolves to the latest version - use this for citation.     |
+| `10.5281/zenodo.20172480` (version)   | Pinned to v1.0.1 specifically - use when reproducibility matters.  |
 
 A machine-readable citation file is also available in [`CITATION.cff`](CITATION.cff) - GitHub will display a "Cite this repository" widget at the top right of the repo page that exports BibTeX / APA / RIS automatically.
 
