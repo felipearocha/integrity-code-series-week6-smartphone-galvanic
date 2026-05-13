@@ -1,0 +1,43 @@
+{
+  "title": "Integrity Code Series - Week 6 - Multi-Scale Galvanic Corrosion in Smartphone Charging Ports",
+  "description": "<p>Multi-scale galvanic corrosion simulator for USB-C smartphone charging ports under sweat, humidity and pocket-lint electrolyte films. Couples the Laplace equation for electrolyte potential distribution with Butler-Volmer kinetics at each dissimilar metal interface (Au plating, Ni underlayer, stainless shell, Cu traces) under USB Power Delivery bias (5-20V), then layers Faradaic dissolution and oxide film growth over charge cycles. An inverse Bayesian engine recovers exchange current densities from sparse electrochemical impedance data.</p><p>The package is the Week 6 entry in the Integrity Code Series of physics-first integrity simulators by Felipe Rocha.</p>",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "creators": [
+    {
+      "name": "Rocha, Felipe",
+      "affiliation": "Independent Researcher"
+    }
+  ],
+  "keywords": [
+    "galvanic corrosion",
+    "consumer electronics reliability",
+    "USB-C",
+    "smartphone",
+    "Butler-Volmer",
+    "Laplace equation",
+    "thin electrolyte film",
+    "multi-scale modeling",
+    "inverse problem",
+    "Bayesian estimation",
+    "exchange current density",
+    "Au/Ni/Cu plating",
+    "electrochemical impedance"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/felipearocha/Integrity-code-series-week6-smartphone-galvanic",
+      "scheme": "url",
+      "resource_type": "software"
+    }
+  ],
+  "references": [
+    "Newman J., Thomas-Alyea K.E. (2004). Electrochemical Systems, 3rd ed., Wiley.",
+    "Bard A.J., Faulkner L.R. (2001). Electrochemical Methods: Fundamentals and Applications, 2nd ed., Wiley.",
+    "Apple Inc. (2024). iPhone 15 USB-C port reliability advisory."
+  ],
+  "language": "eng",
+  "version": "1.0.1"
+}

@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+title: "Integrity Code Series - Week 6 - Multi-Scale Galvanic Corrosion in Smartphone Charging Ports"
+message: "If you use this software, please cite it using the metadata below."
+type: software
+authors:
+  - family-names: Rocha
+    given-names: Felipe
+    affiliation: "Independent Researcher"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"  # TODO: replace once ORCID is provisioned
+repository-code: "https://github.com/felipearocha/Integrity-code-series-week6-smartphone-galvanic"
+url: "https://github.com/felipearocha/Integrity-code-series-week6-smartphone-galvanic"
+abstract: >
+  Multi-scale galvanic corrosion simulator for USB-C smartphone charging ports under sweat, humidity and pocket-lint electrolyte films. Couples the Laplace equation for electrolyte potential distribution with Butler-Volmer kinetics at each dissimilar metal interface (Au plating, Ni underlayer, stainless shell, Cu traces) under USB Power Delivery bias (5-20V), then layers Faradaic dissolution and oxide film growth over charge cycles. An inverse Bayesian engine recovers exchange current densities from sparse electrochemical impedance data. The package is the Week 6 entry in the Integrity Code Series of physics-first integrity simulators by Felipe Rocha.
+keywords:
+  - galvanic corrosion
+  - consumer electronics reliability
+  - USB-C
+  - smartphone
+  - Butler-Volmer
+  - Laplace equation
+  - thin electrolyte film
+  - multi-scale modeling
+  - inverse problem
+  - Bayesian estimation
+  - exchange current density
+  - Au/Ni/Cu plating
+  - electrochemical impedance
+license: MIT
+version: "1.0.1"
+date-released: "2026-05-13"
+identifiers:
+  - type: url
+    value: "https://github.com/felipearocha/Integrity-code-series-week6-smartphone-galvanic/releases/tag/v1.0.1"
+    description: "GitHub release tag v1.0.1"
+  # After first Zenodo release, replace the doi block below with the real value:
+  # - type: doi
+  #   value: "10.5281/zenodo.XXXXXXX"
+  #   description: "Concept DOI (always resolves to latest version)"

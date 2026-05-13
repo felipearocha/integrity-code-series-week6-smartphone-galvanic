@@ -2,6 +2,8 @@
 # Multi-Scale Galvanic Corrosion in Smartphone Charging Ports
 # Dissimilar Metal Electrochemistry with Inverse Parameter Estimation
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+
 ## Integrity Code Series
 
 Part of an ongoing series of physics-first integrity simulators by Felipe Rocha:
@@ -199,3 +201,36 @@ Thin film thickness: 10-500 micrometers (depending on humidity/lint trapping).
     python -m viz.plot_inverse_posterior
     python -m viz.plot_parameter_sensitivity
     python -m viz.generate_gif
+---
+
+## How to Cite
+
+If this software contributes to your work, please cite both the software (this repository) and the underlying methods it implements.
+
+**Software (archived release):**
+
+> Rocha, F. (2026). *Integrity Code Series - Week 6 - Multi-Scale Galvanic Corrosion in Smartphone Charging Ports* (Version 1.0.1) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.XXXXXXX
+
+**BibTeX:**
+
+```bibtex
+@software{rocha_2026_week6,
+  author       = {Rocha, Felipe},
+  title        = {{Integrity Code Series - Week 6 - Multi-Scale Galvanic Corrosion in Smartphone Charging Ports}},
+  year         = 2026,
+  publisher    = {Zenodo},
+  version      = {v1.0.1},
+  doi          = {10.5281/zenodo.XXXXXXX},
+  url          = {https://doi.org/10.5281/zenodo.XXXXXXX}
+}
+```
+
+The two DOIs Zenodo provides are:
+
+| DOI                                  | What it points to                                                  |
+|--------------------------------------|--------------------------------------------------------------------|
+| `10.5281/zenodo.XXXXXXX` (concept)   | Always resolves to the latest version - use this for citation.     |
+| `10.5281/zenodo.YYYYYYY` (version)   | Pinned to v1.0.1 specifically - use when reproducibility matters.  |
+
+A machine-readable citation file is also available in [`CITATION.cff`](CITATION.cff) - GitHub will display a "Cite this repository" widget at the top right of the repo page that exports BibTeX / APA / RIS automatically.
+
