@@ -78,65 +78,64 @@ New dimensions: Multi-scale coupling + Inverse parameter estimation.
 
 ## Governing Equations
 
+[**view the full rendered reference**](https://htmlpreview.github.io/?https://github.com/felipearocha/Integrity-code-series-week6-smartphone-galvanic/blob/main/docs/equations.html)
+
 Every equation below is grounded in standard electrochemistry; the two calibration
 parameters (exchange current densities `j_0` and the oxide-growth coefficient `beta`)
-are tagged `[ASSUMED]`. Full rendered (MathJax) reference:
-**[docs/equations.html](docs/equations.html)** — open in any browser.
+are tagged `[ASSUMED]`. The headline equations render inline below; the full MathJax
+reference is also available at **[docs/equations.html](docs/equations.html)** — open in any browser.
 
 ### Scale 1: Macro (Electrolyte Domain) - Laplace Equation
 
-In the thin electrolyte film, assuming electroneutrality and negligible convection:
+In the thin electrolyte film, assuming electroneutrality and negligible convection, the
+electrolyte potential satisfies current continuity:
 
-    div(kappa * grad(phi)) = 0
+$$ \nabla\!\cdot\!\bigl(\kappa\,\nabla\phi\bigr) \;=\; 0 $$
 
-where:
-- phi: electric potential in electrolyte [V]
-- kappa: electrolyte conductivity [S/m]
-
-For a thin film of thickness delta_e, this reduces to a 2D problem on the port surface.
+where $\phi$ is the electrolyte potential [V] and $\kappa$ the electrolyte conductivity
+[S/m]. For a thin film of thickness $\delta_e$, this reduces to a 2D problem on the port surface.
 
 ### Scale 2: Micro (Metal Interfaces) - Butler-Volmer Kinetics
 
-At each metal surface (boundary condition for the Laplace equation):
+At each metal surface $k$ (boundary condition for the Laplace equation), the interfacial
+current density follows Butler-Volmer kinetics:
 
-    j_k = j_0k * { exp[alpha_a,k * F * eta_k / (R*T)] - exp[-alpha_c,k * F * eta_k / (R*T)] }
+$$ j_k \;=\; j_{0,k}\left\{\exp\!\left[\frac{\alpha_{a,k}\,F\,\eta_k}{R\,T}\right] - \exp\!\left[-\frac{\alpha_{c,k}\,F\,\eta_k}{R\,T}\right]\right\} $$
 
-where:
-- j_k: current density at metal k [A/m^2]
-- j_0k: exchange current density of metal k [A/m^2]
-- alpha_a,k, alpha_c,k: anodic/cathodic transfer coefficients
-- eta_k = phi_metal,k - phi_electrolyte - E_eq,k: overpotential [V]
-- F = 96485 C/mol, R = 8.314 J/(mol*K), T: temperature [K]
+with overpotential
+
+$$ \eta_k \;=\; \phi_{\mathrm{metal},k} - \phi_{\mathrm{electrolyte}} - E_{\mathrm{eq},k} $$
+
+where $j_{0,k}$ is the exchange current density [A/m²], $\alpha_{a,k},\alpha_{c,k}$ the
+anodic/cathodic transfer coefficients, and $E_{\mathrm{eq},k}$ the equilibrium potential
+of metal $k$. Constants $F = 96485$ C/mol, $R = 8.314$ J·mol⁻¹·K⁻¹.
 
 ### Scale 3: Temporal Evolution - Faradaic Mass Loss
 
-    dm_k/dt = (M_k / (n_k * F)) * j_anodic,k
+Mass loss per unit area follows Faraday's law of electrolysis, driven by the anodic current density:
 
-where:
-- m_k: mass loss per unit area [kg/m^2]
-- M_k: molar mass of metal k [kg/mol]
-- n_k: electrons transferred per atom dissolved
+$$ \frac{\mathrm{d}m_k}{\mathrm{d}t} \;=\; \frac{M_k}{n_k\,F}\,j_{\mathrm{anodic},k}, \qquad \frac{\mathrm{d}h_k}{\mathrm{d}t} \;=\; \frac{1}{\rho_k}\,\frac{\mathrm{d}m_k}{\mathrm{d}t} $$
 
-Thickness loss:
-
-    dh_k/dt = dm_k/dt / rho_k
+with $M_k$ the molar mass [kg/mol], $n_k$ the electrons transferred per atom dissolved,
+and $\rho_k$ the density [kg/m³].
 
 ### Oxide Film Growth (Micro-Scale Feedback)
 
-Protective oxide film resistance increases with time:
+A protective oxide film builds resistance in proportion to the anodic charge passed:
 
-    R_oxide,k(t) = R_oxide,0,k + beta_k * integral(j_anodic,k dt)
+$$ R_{\mathrm{oxide},k}(t) \;=\; R_{\mathrm{oxide},0,k} \;+\; \beta_k\!\int j_{\mathrm{anodic},k}\,\mathrm{d}t $$
 
 This feeds back into the effective exchange current density, creating a nonlinear
 coupling between scales.
 
 ### Galvanic Coupling Constraint
 
-At the mixed potential, total anodic current equals total cathodic current:
+At the mixed (couple) potential, total anodic current equals total cathodic current over
+the exposed areas $A_k$:
 
-    sum_k( A_k * j_anodic,k(phi_couple) ) = sum_k( A_k * j_cathodic,k(phi_couple) )
+$$ \sum_k A_k\,j_{\mathrm{anodic},k}\bigl(\phi_{\mathrm{couple}}\bigr) \;=\; \sum_k A_k\,j_{\mathrm{cathodic},k}\bigl(\phi_{\mathrm{couple}}\bigr) $$
 
-where A_k is the exposed area of metal k.
+where $A_k$ is the exposed area of metal $k$.
 
 ## Materials in the System
 
