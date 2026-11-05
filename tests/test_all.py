@@ -176,6 +176,44 @@ class TestLaplaceChargingBias:
         assert n_iter == 3
         assert not converged
 
+    def test_one_dimensional_cell_matches_hand_solution(self):
+        """Au | electrolyte | SS304 reduces to a series circuit, solved by hand.
+
+        Ohm's law and Butler-Volmer at both faces carry the same current j:
+            j = kappa * (phi_L - phi_R) / L = j_Au(5 - phi_L) = -j_SS(-phi_R)
+        """
+        zone_map = np.full((NY, NX), "electrolyte", dtype=object)
+        zone_map[:, :2] = "Au"
+        zone_map[:, -2:] = "SS304"
+        zone_map[0, 2:-2] = "insulator"
+        zone_map[-1, 2:-2] = "insulator"
+
+        phi, _, converged, _ = solve_laplace_2d(zone_map=zone_map, charging_bias=self.BIAS)
+        assert converged
+
+        kappa, gap = 1.5, (NX - 3) * DX
+        au, ss = METALS["Au"], METALS["SS304"]
+        j0_au = effective_j0(au["j0"], au["R_oxide_0"])
+        j0_ss = effective_j0(ss["j0"], ss["R_oxide_0"])
+
+        def mismatch(phi_right):
+            j = -butler_volmer_current(-phi_right, j0_ss, 0.5, 0.5)
+            phi_left = phi_right + j * gap / kappa
+            return butler_volmer_current(self.BIAS - phi_left, j0_au, 0.5, 0.5) - j
+
+        phi_right = brentq(mismatch, 0.0, self.BIAS)
+        j = -butler_volmer_current(-phi_right, j0_ss, 0.5, 0.5)
+        assert phi[NY // 2, -2] == pytest.approx(phi_right, abs=1e-6)
+        assert phi[NY // 2, 1] == pytest.approx(phi_right + j * gap / kappa, abs=1e-6)
+
+        currents = extract_boundary_currents(phi, zone_map)
+        assert currents["Au"]["avg_j"] == pytest.approx(j, rel=1e-3)
+        assert currents["SS304"]["avg_j"] == pytest.approx(-j, rel=1e-3)
+
+        # Zero-flux walls leave no gradient along them
+        wet = phi[1:-1, 2:-2]
+        assert np.ptp(wet, axis=0).max() < 1e-9
+
 
 class TestGalvanicCoupling:
 

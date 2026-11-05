@@ -114,7 +114,7 @@ def solve_laplace_2d(zone_map=None, kappa=None, phi_metals=None,
                 metal = METALS[zone]
                 phi_m = phi_metals.get(zone, metal["E_eq"])
                 phi[k] = phi_m
-            if not wet or zone == "insulator":
+            if not wet:
                 rows.append(k)
                 cols.append(k)
                 vals.append(1.0)
