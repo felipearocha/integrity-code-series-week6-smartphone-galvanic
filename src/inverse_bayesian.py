@@ -2,7 +2,7 @@
 ICS2 Week 6 - Bayesian Inverse Parameter Estimation
 
 Estimates exchange current densities (j_0) for each metal from
-sparse synthetic impedance/current observations using Metropolis-Hastings
+sparse synthetic galvanic current observations using Metropolis-Hastings
 MCMC.
 
 The inverse problem:

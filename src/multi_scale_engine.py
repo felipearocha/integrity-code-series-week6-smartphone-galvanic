@@ -117,14 +117,16 @@ def run_forward_simulation(verbose=True):
     # ------------------------------------------------------------------
     # Step 4: Temporal evolution (charge cycles)
     # ------------------------------------------------------------------
+    n_cycles = min(SIM_PARAMS["n_charge_cycles"], 100)  # Limit for speed
+
     if verbose:
         print("\n[4/6] Simulating temporal evolution over charge cycles...")
-        print(f"  Cycles: {SIM_PARAMS['n_charge_cycles']}, "
+        print(f"  Cycles: {n_cycles}, "
               f"Duration: {SIM_PARAMS['cycle_duration']}s each")
 
     temporal_results = simulate_charge_cycles(
         areas,
-        n_cycles=min(SIM_PARAMS["n_charge_cycles"], 100),  # Limit for speed
+        n_cycles=n_cycles,
         cycle_duration=SIM_PARAMS["cycle_duration"],
     )
 

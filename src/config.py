@@ -199,7 +199,7 @@ INVERSE_CONFIG = {
     "j0_SS304_prior": (-7, -3),
     "j0_Cu_prior": (-7, -3),
     # Synthetic observation noise
-    "obs_noise_std": 0.05,       # 5% relative noise on synthetic impedance data
+    "obs_noise_std": 0.05,       # 5% relative noise on synthetic galvanic current data
     "n_obs_points": 20,          # Number of synthetic observation locations
 }
 
