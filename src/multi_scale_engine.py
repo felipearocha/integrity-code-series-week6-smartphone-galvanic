@@ -1,11 +1,14 @@
 """
 ICS2 Week 6 - Multi-Scale Engine Orchestrator
 
-Couples all simulation components:
+Runs the simulation components in sequence:
 1. Macro: 2D Laplace solver for potential distribution
 2. Micro: Butler-Volmer kinetics at metal interfaces
 3. Temporal: Faradaic dissolution + oxide growth ODE
 4. Inverse: Bayesian j0 estimation from synthetic observations
+
+The Laplace field is a standalone result: it does not feed the mixed-potential
+or temporal steps, so those run without the charging bias or any ohmic drop.
 
 Also runs LHS parametric sweep for sensitivity analysis.
 """
@@ -91,7 +94,8 @@ def run_forward_simulation(verbose=True):
 
     if verbose:
         print(f"  Converged: {converged} in {n_iter} iterations")
-        print(f"  Potential range: [{phi.min():.4f}, {phi.max():.4f}] V")
+        wet = phi[zone_map == "electrolyte"]
+        print(f"  Electrolyte potential range: [{wet.min():.4f}, {wet.max():.4f}] V")
         print(f"  Max current density: {j_field.max():.4e} A/m^2")
 
     # ------------------------------------------------------------------
@@ -141,9 +145,8 @@ def run_forward_simulation(verbose=True):
     results["critical_metal"] = critical_metal
 
     if verbose:
-        print(f"  Estimated port lifetime: {lifetime_cycles:.0f} cycles "
-              f"({lifetime_years:.1f} years)")
-        print(f"  Critical metal (fails first): {critical_metal}")
+        print(f"  First metal past 80% thickness loss: {critical_metal} "
+              f"at cycle {lifetime_cycles:.1f} (uncalibrated, not a port lifetime)")
 
     # ------------------------------------------------------------------
     # Step 5: Area ratio sensitivity
@@ -242,7 +245,7 @@ def run_inverse_estimation(areas, verbose=True):
     """
     if verbose:
         print("\n" + "=" * 70)
-        print("INVERSE ESTIMATION: Bayesian j0 Recovery")
+        print("INVERSE ESTIMATION: Bayesian j0 Estimate")
         print("=" * 70)
 
     # True parameters (what we try to recover)
