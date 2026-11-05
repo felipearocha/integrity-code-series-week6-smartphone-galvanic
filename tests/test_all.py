@@ -362,6 +362,15 @@ class TestInverseEstimation:
         assert len(chain) > 0
         assert 0 <= acc_rate <= 1
 
+    def test_rejected_prior_proposals_stay_in_chain(self):
+        """Metropolis-Hastings repeats the state on any rejection.
+
+        Dropping out-of-prior steps biases the chain away from the prior bounds.
+        """
+        obs = generate_synthetic_observations(self.true_j0s, self.areas, n_obs=3)
+        chain, _, _ = run_mcmc(obs, n_samples=50, proposal_std=2.0)
+        assert len(chain) == 50
+
     def test_posterior_statistics(self):
         """Posterior stats should have required keys."""
         obs = generate_synthetic_observations(self.true_j0s, self.areas, n_obs=10)
