@@ -51,7 +51,7 @@ def unpack_state(y, metals_order):
     return thicknesses, R_oxides, charges
 
 
-def rhs_temporal(t, y, metals_order, areas, T=T_DEFAULT, charging_active=True):
+def rhs_temporal(t, y, metals_order, areas, T=T_DEFAULT):
     """
     Right-hand side of the temporal ODE system.
 
@@ -67,8 +67,6 @@ def rhs_temporal(t, y, metals_order, areas, T=T_DEFAULT, charging_active=True):
         Exposed areas per metal.
     T : float
         Temperature [K].
-    charging_active : bool
-        Whether charging bias is applied.
 
     Returns
     -------
@@ -221,8 +219,10 @@ def simulate_charge_cycles(areas, n_cycles=None, cycle_duration=None,
 
 def estimate_port_lifetime(results, critical_thickness_fraction=0.8):
     """
-    Estimate charging port lifetime based on when the most vulnerable
-    metal (thinnest plating) loses a critical fraction of its thickness.
+    Find when the first metal loses a critical fraction of its thickness.
+
+    With the uncalibrated j0 values and no oxygen-reduction cathode this is a
+    model output, not a port lifetime prediction.
 
     Parameters
     ----------

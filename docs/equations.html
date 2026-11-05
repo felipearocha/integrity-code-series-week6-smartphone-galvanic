@@ -109,7 +109,7 @@
 
 <header>
   <h1>Integrity Code Series — Week 6</h1>
-  <p class="subtitle">Multi-Scale Galvanic Corrosion in Smartphone Charging Ports — Governing Equations Reference</p>
+  <p class="subtitle">Galvanic Corrosion in Smartphone Charging Ports — Governing Equations Reference</p>
   <p class="subtitle"><strong>Felipe Rocha</strong></p>
 </header>
 
@@ -164,7 +164,7 @@ where $j_{0,k}$ is the exchange current density [A/m²], $\alpha_{a,k},\alpha_{c
 
 <h3>3.1 Protective-oxide resistance</h3>
 <div class="eq-card">
-A protective oxide film builds resistance in proportion to the anodic charge passed, feeding back into the effective exchange current density and coupling the micro and temporal scales:
+A protective oxide film builds resistance in proportion to the anodic charge passed, feeding back into the effective exchange current density and the mixed potential:
 $$
 R_{\mathrm{oxide},k}(t) \;=\; R_{\mathrm{oxide},0,k} \;+\; \beta_k\!\int j_{\mathrm{anodic},k}\,\mathrm{d}t
 $$
@@ -182,7 +182,7 @@ Mass loss per unit area of metal $k$ follows Faraday's law of electrolysis, driv
 $$
 \frac{\mathrm{d}m_k}{\mathrm{d}t} \;=\; \frac{M_k}{n_k\,F}\,j_{\mathrm{anodic},k},
 \qquad
-\frac{\mathrm{d}h_k}{\mathrm{d}t} \;=\; \frac{1}{\rho_k}\,\frac{\mathrm{d}m_k}{\mathrm{d}t}
+\frac{\mathrm{d}h_k}{\mathrm{d}t} \;=\; -\frac{1}{\rho_k}\,\frac{\mathrm{d}m_k}{\mathrm{d}t}
 $$
 with $M_k$ the molar mass [kg/mol], $n_k$ the electrons transferred per atom dissolved, and $\rho_k$ the density [kg/m³].
 <p class="src">SOURCE: Faraday's law of electrolysis. $M_k$, $n_k$, $\rho_k$ from the materials table (handbook values).</p>
@@ -230,7 +230,7 @@ $$
 </div>
 
 <footer>
-  Integrity Code Series — Week 6 · Felipe Rocha · 38 / 38 tests passing<br>
+  Integrity Code Series — Week 6 · Felipe Rocha · 43 / 43 tests passing<br>
   Browse the rendered panels in <code>assets/</code> for visual results.
 </footer>
 

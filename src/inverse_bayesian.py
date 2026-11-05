@@ -2,7 +2,7 @@
 ICS2 Week 6 - Bayesian Inverse Parameter Estimation
 
 Estimates exchange current densities (j_0) for each metal from
-sparse synthetic impedance/current observations using Metropolis-Hastings
+sparse synthetic galvanic current observations using Metropolis-Hastings
 MCMC.
 
 The inverse problem:
@@ -147,12 +147,12 @@ def run_mcmc(obs_data, n_samples=None, T=T_DEFAULT, seed=None,
 
     Returns
     -------
-    chain : ndarray, shape (n_accepted, 4)
+    chain : ndarray, shape (n_samples, 4)
         MCMC chain in log10(j0) space [Au, Ni, SS304, Cu].
     acceptance_rate : float
         Fraction of proposals accepted.
     log_likelihoods : list
-        Log-likelihood at each accepted sample.
+        Log-likelihood at each step of the chain.
     """
     if n_samples is None:
         n_samples = INVERSE_CONFIG.get("n_bayesian_samples",
@@ -184,21 +184,21 @@ def run_mcmc(obs_data, n_samples=None, T=T_DEFAULT, seed=None,
             proposed_log10[mk] = current_log10[mk] + rng.normal(0, proposal_std)
 
         proposed_lp = log_prior(proposed_log10)
-        if proposed_lp == -np.inf:
-            continue
 
-        proposed_j0s = {mk: 10.0 ** proposed_log10[mk] for mk in metals_order}
-        proposed_ll = log_likelihood(proposed_j0s, obs_data, T)
+        # Outside the prior is a rejection: the current state is recorded again
+        if proposed_lp > -np.inf:
+            proposed_j0s = {mk: 10.0 ** proposed_log10[mk] for mk in metals_order}
+            proposed_ll = log_likelihood(proposed_j0s, obs_data, T)
 
-        # Metropolis criterion
-        log_alpha = (proposed_ll + proposed_lp) - (current_ll + current_lp)
+            # Metropolis criterion
+            log_alpha = (proposed_ll + proposed_lp) - (current_ll + current_lp)
 
-        if np.log(rng.random()) < log_alpha:
-            current_log10 = proposed_log10
-            current_j0s = proposed_j0s
-            current_ll = proposed_ll
-            current_lp = proposed_lp
-            n_accepted += 1
+            if np.log(rng.random()) < log_alpha:
+                current_log10 = proposed_log10
+                current_j0s = proposed_j0s
+                current_ll = proposed_ll
+                current_lp = proposed_lp
+                n_accepted += 1
 
         chain.append([current_log10[mk] for mk in metals_order])
         log_lls.append(current_ll)

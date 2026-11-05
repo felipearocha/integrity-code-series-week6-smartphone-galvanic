@@ -1,6 +1,9 @@
 """
 ICS2 Week 6 - Animated GIF V9
 
+ILLUSTRATIVE ONLY: random pit growth drawn for explanation. It is not solver
+output, and it shows Au eroding, which the model does not predict.
+
 CONCEPT: Wide lateral cross-section of a contact pin plating stack,
 drawn like a geological stratigraphy diagram.
 
@@ -289,7 +292,7 @@ def generate_gif(save_path="assets/corrosion_evolution.gif", n_frames=90, fps=8)
 
         # Title
         ax.text(7, elec_top_y + 1.0,
-                 f"INTEGRITY CODE SERIES  |  Week 6: Galvanic Corrosion  |  Cycle {cycle}",
+                 f"Week 6: Galvanic Corrosion  |  ILLUSTRATIVE, not solver output  |  Cycle {cycle}",
                  ha="center", fontsize=11, color="#00d4ff",
                  fontweight="bold", fontfamily="monospace")
 
