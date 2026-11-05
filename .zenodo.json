@@ -1,6 +1,6 @@
 {
   "title": "Integrity Code Series - Week 6 - Multi-Scale Galvanic Corrosion in Smartphone Charging Ports",
-  "description": "<p>Multi-scale galvanic corrosion simulator for USB-C smartphone charging ports under sweat, humidity and pocket-lint electrolyte films. Couples the Laplace equation for electrolyte potential distribution with Butler-Volmer kinetics at each dissimilar metal interface (Au plating, Ni underlayer, stainless shell, Cu traces) under USB Power Delivery bias (5-20V), then layers Faradaic dissolution and oxide film growth over charge cycles. An inverse Bayesian engine recovers exchange current densities from sparse electrochemical impedance data.</p><p>The package is the Week 6 entry in the Integrity Code Series of physics-first integrity simulators by Felipe Rocha.</p>",
+  "description": "<p>Multi-scale galvanic corrosion simulator for USB-C smartphone charging ports under sweat, humidity and pocket-lint electrolyte films. Couples the Laplace equation for electrolyte potential distribution with Butler-Volmer kinetics at each dissimilar metal interface (Au plating, Ni underlayer, stainless shell, Cu traces) under a 5 V charging bias, then layers Faradaic dissolution and oxide film growth over charge cycles. An inverse Bayesian engine estimates exchange current densities from sparse synthetic galvanic current observations.</p><p>The package is the Week 6 entry in the Integrity Code Series of physics-first integrity simulators by Felipe Rocha.</p>",
   "upload_type": "software",
   "access_right": "open",
   "license": "MIT",
@@ -22,8 +22,7 @@
     "inverse problem",
     "Bayesian estimation",
     "exchange current density",
-    "Au/Ni/Cu plating",
-    "electrochemical impedance"
+    "Au/Ni/Cu plating"
   ],
   "related_identifiers": [
     {

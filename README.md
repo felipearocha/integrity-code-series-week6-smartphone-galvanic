@@ -1,12 +1,11 @@
 # INTEGRITY CODE SERIES - WEEK 6
-# Multi-Scale Galvanic Corrosion in Smartphone Charging Ports
-# Dissimilar Metal Electrochemistry with Inverse Parameter Estimation
+
+**Multi-Scale Galvanic Corrosion in Smartphone Charging Ports: Dissimilar Metal Electrochemistry with Inverse Parameter Estimation**
 
 [![CI](https://github.com/felipearocha/integrity-code-series-week6-smartphone-galvanic/actions/workflows/ci.yml/badge.svg)](https://github.com/felipearocha/integrity-code-series-week6-smartphone-galvanic/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![Tests: 38 passing](https://img.shields.io/badge/tests-38%20passing-brightgreen.svg)](tests)
-[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20172479.svg)](https://doi.org/10.5281/zenodo.20172479)
 
 ## Integrity Code Series
@@ -39,7 +38,7 @@ This project builds a multi-scale galvanic corrosion simulator that couples:
 1. Macro-scale: Laplace equation for potential distribution in the thin electrolyte film
 2. Micro-scale: Butler-Volmer kinetics at each metal interface
 3. Temporal: Faradaic dissolution and oxide film growth over charge cycles
-4. Inverse: Bayesian estimation of exchange current densities from sparse impedance data
+4. Inverse: Bayesian estimation of exchange current densities from sparse synthetic galvanic current observations
 
 ## Industrial Decision Improved
 
@@ -173,9 +172,10 @@ Thin film thickness: 10-500 micrometers (depending on humidity/lint trapping).
 
 ## Repository Structure
 
-    integrity_code_series_week6_smartphone_galvanic/
+    integrity-code-series-week6-smartphone-galvanic/
     |-- README.md
     |-- requirements.txt
+    |-- run_all.py                 # Runs the engine, all figures and the GIF in order
     |-- src/
     |   |-- __init__.py
     |   |-- config.py              # Material properties, geometry, simulation parameters
@@ -204,6 +204,10 @@ Thin film thickness: 10-500 micrometers (depending on humidity/lint trapping).
 
     pip install -r requirements.txt
     python -m pytest tests/ -v
+    python run_all.py
+
+`run_all.py` runs these steps in order (about 5 minutes); each can also be run on its own:
+
     python -m src.multi_scale_engine
     python -m viz.plot_potential_field
     python -m viz.plot_current_density
