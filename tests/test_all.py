@@ -13,6 +13,7 @@ Tests cover:
 
 import numpy as np
 import pytest
+from scipy.optimize import brentq
 import sys
 import os
 
@@ -121,7 +122,7 @@ class TestLaplaceSolver:
         phi, j_field, converged, n_iter = solve_laplace_2d(
             zone_map=zone_map, max_iter=5000, tol=1e-4
         )
-        assert converged or n_iter <= 5000
+        assert converged
 
     def test_potential_field_is_finite(self):
         """No NaN or Inf in potential field."""
@@ -145,6 +146,36 @@ class TestLaplaceSolver:
 # ======================================================================
 # Galvanic Coupling Tests
 # ======================================================================
+
+class TestLaplaceChargingBias:
+    """The default run applies the charging bias to the Au pins."""
+
+    BIAS = SIM_PARAMS["charging_voltage"]
+
+    def test_biased_field_obeys_maximum_principle(self):
+        """Each metal pulls phi toward phi_m - E_eq: 0 V, or the bias on Au.
+
+        A harmonic field cannot leave that range.
+        """
+        zone_map = build_metal_zone_map()
+        phi, _, converged, _ = solve_laplace_2d(zone_map=zone_map, charging_bias=self.BIAS)
+        wet = phi[zone_map == "electrolyte"]
+        assert converged
+        assert wet.min() >= 0.0
+        assert wet.max() <= self.BIAS
+
+    def test_current_density_bounded_by_ohmic_limit(self):
+        """|j| cannot exceed kappa * bias over one grid spacing."""
+        zone_map = build_metal_zone_map()
+        _, j_field, _, _ = solve_laplace_2d(zone_map=zone_map, charging_bias=self.BIAS)
+        assert j_field.max() <= 1.5 * self.BIAS / min(DX, DY)
+
+    def test_unfinished_solve_is_not_reported_converged(self):
+        """Stopping early must return converged=False."""
+        _, _, converged, n_iter = solve_laplace_2d(charging_bias=self.BIAS, max_iter=3)
+        assert n_iter == 3
+        assert not converged
+
 
 class TestGalvanicCoupling:
 
