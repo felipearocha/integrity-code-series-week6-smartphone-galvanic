@@ -6,7 +6,7 @@ Tests cover:
 2. Laplace solver: convergence, boundary conditions, conservation
 3. Galvanic coupling: charge conservation, area ratio effects
 4. Temporal evolution: mass conservation, passivation behavior
-5. Inverse estimation: parameter recovery, MCMC diagnostics
+5. Inverse estimation: priors, synthetic data, MCMC chain
 6. Cybersecurity: audit chain integrity, sensor validation
 7. Integration: full pipeline consistency
 """

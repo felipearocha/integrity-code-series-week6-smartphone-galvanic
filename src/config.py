@@ -63,7 +63,7 @@ METALS = {
     },
     "SS304": {
         "name": "Stainless Steel 304 (shell)",
-        "E_eq": -0.10,
+        "E_eq": -0.10,          # Model value, an alloy has no single E_eq [ASSUMED]
         "j0": 1e-5,             # [ASSUMED]
         "alpha_a": 0.5,
         "alpha_c": 0.5,
