@@ -1,5 +1,5 @@
 """
-ICS2 Week 6 - Evans Diagram and Mixed Potential Visualization
+Week 6 - Evans Diagram and Mixed Potential Visualization
 
 Shows the classic galvanic corrosion diagram with polarization
 curves for all four metals intersecting at the mixed potential.
@@ -45,7 +45,7 @@ def plot_current_density(save_path="assets/evans_diagram.png", dpi=200):
         # Plot anodic branch (positive current)
         j_anodic = np.where(j_arr > 0, j_arr, np.nan)
         ax.semilogy(E_range, j_anodic, color=colors[mk], linewidth=2,
-                     label=f"{mk} anodic (E_eq={metal['E_eq']:.3f} V)")
+                     label=f"{mk} ($E_{{eq}}$ = {metal['E_eq']:.3f} V)")
 
         # Plot cathodic branch (absolute value of negative current)
         j_cathodic = np.where(j_arr < 0, -j_arr, np.nan)
@@ -58,29 +58,36 @@ def plot_current_density(save_path="assets/evans_diagram.png", dpi=200):
 
     # Mark mixed potential
     ax.axvline(x=E_mix, color="red", linewidth=2, linestyle="-",
-                label=f"E_mix = {E_mix:.4f} V")
+                label=f"$E_{{mix}}$ = {E_mix:.4f} V")
     ax.axhline(y=abs(I_corr / sum(areas.values())), color="red",
                 linewidth=1, linestyle=":", alpha=0.5)
 
     ax.set_xlabel("Potential [V vs SHE]", fontsize=12)
-    ax.set_ylabel("Current Density [A/m^2]", fontsize=12)
-    ax.set_title("ICS2 Week 6: Evans Diagram\n"
+    ax.set_ylabel(r"Current Density $|j|$ [A/m$^2$]", fontsize=12)
+    ax.set_title("Week 6: Evans Diagram\n"
                  "Galvanic Coupling of Au/Ni/SS304/Cu in 0.5% NaCl Thin Film",
                  fontsize=12, fontweight="bold")
     ax.set_ylim(1e-10, 1e2)
     ax.set_xlim(-0.8, 1.8)
+    # Line-style key: solid = anodic branch, dashed = cathodic branch
+    ax.plot([], [], color="black", linewidth=1.5, label="solid: anodic branch")
+    ax.plot([], [], color="black", linewidth=1.5, linestyle="--",
+            label="dashed: cathodic branch")
     ax.legend(fontsize=8, loc="upper left")
     ax.grid(True, alpha=0.3, which="both")
 
-    # Annotate anode/cathode roles
+    # Mark each metal's net current at E_mix and list the roles in an empty
+    # corner of the plot, so no label sits on a polarization curve.
+    role_lines = [r"At $E_{mix}$ (net $|j|$):"]
     for mk, data in mc.items():
-        metal = METALS[mk]
-        role_text = "ANODE" if data["role"] == "anode" else "CATHODE"
         y_pos = max(abs(data["j_net"]), 1e-9)
-        ax.annotate(f"{mk}: {role_text}", xy=(E_mix, y_pos),
-                     xytext=(E_mix + 0.15, y_pos * 5),
-                     fontsize=8, color=colors[mk],
-                     arrowprops=dict(arrowstyle="->", color=colors[mk], lw=0.8))
+        ax.plot(E_mix, y_pos, "o", color=colors[mk], markeredgecolor="black",
+                markersize=6, zorder=5)
+        role = "anode" if data["role"] == "anode" else "cathode"
+        role_lines.append(f"{mk}: {role}, {abs(data['j_net']):.2e} A/m$^2$")
+    ax.text(0.60, 1e-9, "\n".join(role_lines), fontsize=8, va="bottom",
+            ha="left", bbox=dict(boxstyle="round", facecolor="white",
+                                 edgecolor="0.6", alpha=0.9))
 
     plt.tight_layout()
     os.makedirs(os.path.dirname(save_path), exist_ok=True)

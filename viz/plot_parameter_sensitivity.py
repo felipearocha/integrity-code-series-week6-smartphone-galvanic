@@ -1,5 +1,5 @@
 """
-ICS2 Week 6 - LHS Parameter Sensitivity Visualization
+Week 6 - LHS Parameter Sensitivity Visualization
 
 Generates iso-risk maps and sensitivity scatter plots from
 Latin Hypercube Sampling parametric sweep.
@@ -40,7 +40,7 @@ def plot_parameter_sensitivity(save_path="assets/lhs_sensitivity.png", dpi=200):
     CR_Ni = CR_Ni[valid]
 
     fig, axes = plt.subplots(2, 3, figsize=(16, 10), dpi=dpi)
-    fig.suptitle("ICS2 Week 6: LHS Parametric Sensitivity Analysis\n"
+    fig.suptitle("Week 6: LHS Parametric Sensitivity Analysis\n"
                  f"4D Parameter Space | {len(E_mix)} Valid Samples",
                  fontsize=12, fontweight="bold")
 
@@ -49,8 +49,8 @@ def plot_parameter_sensitivity(save_path="assets/lhs_sensitivity.png", dpi=200):
     sc = ax.scatter(samples[:, 1], samples[:, 2], c=np.log10(np.abs(I_corr) + 1e-20),
                      s=3, alpha=0.6, cmap="viridis")
     fig.colorbar(sc, ax=ax, label="log10(I_corr) [A]")
-    ax.set_xlabel("log10(j0_Ni)")
-    ax.set_ylabel("log10(j0_SS304)")
+    ax.set_xlabel("log10(j0_Ni) [A/m²]")
+    ax.set_ylabel("log10(j0_SS304) [A/m²]")
     ax.set_title("Ni vs SS304: Corrosion Current")
 
     # Panel 2: j0_Au vs j0_Cu colored by E_mix
@@ -58,8 +58,8 @@ def plot_parameter_sensitivity(save_path="assets/lhs_sensitivity.png", dpi=200):
     sc = ax.scatter(samples[:, 0], samples[:, 3], c=E_mix,
                      s=3, alpha=0.6, cmap="coolwarm")
     fig.colorbar(sc, ax=ax, label="E_mix [V vs SHE]")
-    ax.set_xlabel("log10(j0_Au)")
-    ax.set_ylabel("log10(j0_Cu)")
+    ax.set_xlabel("log10(j0_Au) [A/m²]")
+    ax.set_ylabel("log10(j0_Cu) [A/m²]")
     ax.set_title("Au vs Cu: Mixed Potential")
 
     # Panel 3: j0_Ni vs CR_Ni (direct relationship)
@@ -68,7 +68,7 @@ def plot_parameter_sensitivity(save_path="assets/lhs_sensitivity.png", dpi=200):
     if np.any(cr_valid):
         ax.scatter(samples[cr_valid, 1], np.log10(CR_Ni[cr_valid] + 1e-20),
                     s=3, alpha=0.5, color="crimson")
-    ax.set_xlabel("log10(j0_Ni)")
+    ax.set_xlabel("log10(j0_Ni) [A/m²]")
     ax.set_ylabel("log10(CR_Ni) [mm/yr]")
     ax.set_title("Ni Exchange Current vs Corrosion Rate")
     ax.grid(True, alpha=0.3)
@@ -109,6 +109,7 @@ def plot_parameter_sensitivity(save_path="assets/lhs_sensitivity.png", dpi=200):
     bars = ax.barh(labels, importances, color=["#FFD700", "#A0A0A0", "#707070", "#B87333"])
     ax.set_xlabel("|Spearman Correlation| with log10(I_corr)")
     ax.set_title("Parameter Sensitivity Ranking")
+    ax.set_xlim(0, max(importances) * 1.18)  # room for the value labels
     for bar, val in zip(bars, importances):
         ax.text(bar.get_width() + 0.01, bar.get_y() + bar.get_height()/2,
                 f"{val:.3f}", va="center", fontsize=9)

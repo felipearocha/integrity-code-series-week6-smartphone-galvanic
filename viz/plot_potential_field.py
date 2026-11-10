@@ -1,5 +1,5 @@
 """
-ICS2 Week 6 - Hero Visual: 2D Potential Field and Current Density Map
+Week 6 - Hero Visual: 2D Potential Field and Current Density Map
 
 Generates the primary visualization showing:
 - Left panel: Electrolyte potential distribution phi(x,y)
@@ -50,16 +50,27 @@ def plot_potential_field(save_path="assets/hero_potential_current.png", dpi=200)
     for label, val in zone_colors.items():
         zone_numeric[zone_map == label] = val
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 4.5), dpi=dpi)
-    fig.suptitle("ICS2 Week 6: USB-C Charging Port Galvanic Corrosion\n"
+    # Height matched to the equal-aspect port geometry, so no empty band.
+    fig, axes = plt.subplots(1, 2, figsize=(14, 3.1), dpi=dpi)
+    fig.suptitle("Week 6: USB-C Charging Port Galvanic Corrosion\n"
                  "2D Electrolyte Potential and Current Density (Thin Film Model)",
-                 fontsize=12, fontweight="bold", y=1.02)
+                 fontsize=12, fontweight="bold")
 
     # Left panel: Potential field
     ax1 = axes[0]
     phi_plot = np.ma.masked_where(zone_map != "electrolyte", phi)
     im1 = ax1.pcolormesh(X, Y, phi_plot, cmap="RdBu_r", shading="auto")
     cb1 = fig.colorbar(im1, ax=ax1, label="Potential [V vs SHE]", shrink=0.85)
+
+    # Fill metal zones with the legend colors so the legend matches the plot
+    fill_colors = {"Au": "gold", "Ni": "silver", "SS304": "gray", "Cu": "peru"}
+    for ax in axes:
+        for mk, fc in fill_colors.items():
+            mask = (zone_map == mk)
+            if np.any(mask):
+                ax.pcolormesh(X, Y, np.ma.masked_where(~mask, np.ones_like(X)),
+                              cmap=matplotlib.colors.ListedColormap([fc]),
+                              shading="auto")
 
     # Overlay metal zones
     for mk, color_val in zone_colors.items():
@@ -89,7 +100,7 @@ def plot_potential_field(save_path="assets/hero_potential_current.png", dpi=200)
         mask = (zone_map == mk)
         if np.any(mask):
             ax2.contour(X, Y, mask.astype(float), levels=[0.5],
-                        colors="white", linewidths=0.5)
+                        colors="black", linewidths=0.5)
 
     ax2.set_xlabel("Width [mm]")
     ax2.set_ylabel("Height [mm]")

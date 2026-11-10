@@ -1,5 +1,5 @@
 """
-ICS2 Week 6 - Inverse Estimation Posterior Visualization
+Week 6 - Inverse Estimation Posterior Visualization
 
 Generates:
 - Corner plot of posterior distributions for j0 parameters
@@ -39,21 +39,23 @@ def plot_inverse_posterior(save_path="assets/inverse_posterior.png", dpi=200):
     post_chain = chain[burn_in:]
 
     fig, axes = plt.subplots(3, 4, figsize=(16, 12), dpi=dpi)
-    fig.suptitle("ICS2 Week 6: Bayesian Inverse Estimation of Exchange Current Densities\n"
+    fig.suptitle("Week 6: Bayesian Inverse Estimation of Exchange Current Densities\n"
                  "Metropolis-Hastings MCMC | 4-Parameter Estimation from Synthetic Galvanic Data",
                  fontsize=12, fontweight="bold")
 
     colors = ["#FFD700", "#A0A0A0", "#707070", "#B87333"]
+    # Darker shades for the thin trace lines; the fill colors above wash out.
+    trace_colors = ["#B8860B", "#606060", "#303030", "#8B4513"]
 
     # Row 1: MCMC Trace Plots
     for i, mk in enumerate(metals_order):
         ax = axes[0, i]
-        ax.plot(chain[:, i], color=colors[i], alpha=0.5, linewidth=0.3)
+        ax.plot(chain[:, i], color=trace_colors[i], linewidth=0.7)
         ax.axhline(y=true_log10[i], color="red", linewidth=1.5,
                     linestyle="--", label="True value")
         ax.axvline(x=burn_in, color="black", linewidth=0.8,
                     linestyle=":", label="Burn-in")
-        ax.set_ylabel(f"log10(j0_{mk})")
+        ax.set_ylabel(f"log10(j0_{mk}) [A/m²]")
         ax.set_xlabel("MCMC Step")
         ax.set_title(f"{mk} Trace")
         ax.legend(fontsize=7)
@@ -72,7 +74,7 @@ def plot_inverse_posterior(save_path="assets/inverse_posterior.png", dpi=200):
         ci = stats[mk]["ci_95_log10"]
         ax.axvspan(ci[0], ci[1], alpha=0.15, color="blue", label="95% CI")
 
-        ax.set_xlabel(f"log10(j0) [{mk}]")
+        ax.set_xlabel(f"log10(j0_{mk}) [A/m²]")
         ax.set_ylabel("Posterior Density")
         ax.set_title(f"{mk} Posterior")
         ax.legend(fontsize=7)
@@ -84,8 +86,8 @@ def plot_inverse_posterior(save_path="assets/inverse_posterior.png", dpi=200):
                       color="steelblue")
     ax_pair1.axvline(x=true_log10[1], color="red", linewidth=1, linestyle="--")
     ax_pair1.axhline(y=true_log10[2], color="red", linewidth=1, linestyle="--")
-    ax_pair1.set_xlabel("log10(j0_Ni)")
-    ax_pair1.set_ylabel("log10(j0_SS304)")
+    ax_pair1.set_xlabel("log10(j0_Ni) [A/m²]")
+    ax_pair1.set_ylabel("log10(j0_SS304) [A/m²]")
     ax_pair1.set_title("Ni vs SS304 Correlation")
 
     # Pair 2: Au vs Cu
@@ -94,8 +96,8 @@ def plot_inverse_posterior(save_path="assets/inverse_posterior.png", dpi=200):
                       color="darkorange")
     ax_pair2.axvline(x=true_log10[0], color="red", linewidth=1, linestyle="--")
     ax_pair2.axhline(y=true_log10[3], color="red", linewidth=1, linestyle="--")
-    ax_pair2.set_xlabel("log10(j0_Au)")
-    ax_pair2.set_ylabel("log10(j0_Cu)")
+    ax_pair2.set_xlabel("log10(j0_Au) [A/m²]")
+    ax_pair2.set_ylabel("log10(j0_Cu) [A/m²]")
     ax_pair2.set_title("Au vs Cu Correlation")
 
     # Log-likelihood convergence
@@ -121,14 +123,15 @@ def plot_inverse_posterior(save_path="assets/inverse_posterior.png", dpi=200):
 
     table = ax_table.table(
         cellText=table_data,
-        colLabels=["Metal", "True log10(j0)", "Est. Mean", "95% CI"],
+        colLabels=["Metal", "True", "Mean", "95% CI"],
+        colWidths=[0.2, 0.17, 0.17, 0.46],
         loc="center",
         cellLoc="center",
     )
     table.auto_set_font_size(False)
     table.set_fontsize(9)
     table.scale(1.0, 1.5)
-    ax_table.set_title("Parameter Estimation Summary", fontsize=10)
+    ax_table.set_title("Summary, log10(j0 [A/m$^2$])", fontsize=10)
 
     # Acceptance rate annotation
     fig.text(0.5, -0.02,
