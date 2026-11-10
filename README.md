@@ -5,7 +5,7 @@
 [![CI](https://github.com/felipearocha/integrity-code-series-week6-smartphone-galvanic/actions/workflows/ci.yml/badge.svg)](https://github.com/felipearocha/integrity-code-series-week6-smartphone-galvanic/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
-[![Tests: 38 passing](https://img.shields.io/badge/tests-43%20passing-brightgreen.svg)](tests)
+[![Tests: 43 passing](https://img.shields.io/badge/tests-43%20passing-brightgreen.svg)](tests)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20172479.svg)](https://doi.org/10.5281/zenodo.20172479)
 
 ## Executive Summary
@@ -56,7 +56,7 @@ cathode; see [Limitations](#limitations).
 
 ![Thickness loss, oxide growth and area-ratio sensitivity](assets/dissolution_temporal.png)
 
-![Evans diagram](assets/evans_diagram.png)
+![Evans diagram: polarization curves of Au, Ni, SS304 and Cu and the mixed potential](assets/evans_diagram.png)
 
 ![LHS sensitivity of the mixed potential and galvanic current](assets/lhs_sensitivity.png)
 
