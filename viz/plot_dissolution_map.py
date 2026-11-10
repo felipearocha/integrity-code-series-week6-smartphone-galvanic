@@ -1,5 +1,5 @@
 """
-ICS2 Week 6 - Dissolution Map and Temporal Evolution Plots
+Week 6 - Dissolution Map and Temporal Evolution Plots
 
 Generates:
 - Thickness loss over charge cycles for all four metals
@@ -34,21 +34,24 @@ def plot_dissolution_map(save_path="assets/dissolution_temporal.png", dpi=200):
     )
 
     fig, axes = plt.subplots(2, 2, figsize=(13, 10), dpi=dpi)
-    fig.suptitle("ICS2 Week 6: Temporal Evolution of Galvanic Corrosion\n"
+    fig.suptitle("Week 6: Temporal Evolution of Galvanic Corrosion\n"
                  "USB-C Charging Port Multi-Metal System",
                  fontsize=12, fontweight="bold")
 
     colors = {"Au": "#FFD700", "Ni": "#A0A0A0", "SS304": "#707070", "Cu": "#B87333"}
+    # Au and Cu stay at zero loss and overlap; draw Au dashed on top so both show.
+    styles = {"Au": dict(linestyle="--", zorder=3)}
     metals_order = results["metals_order"]
 
     # Panel 1: Thickness remaining vs cycles
     ax1 = axes[0, 0]
     for mk in metals_order:
         h = results[f"{mk}_thickness"] * 1e6  # Convert to micrometers
-        ax1.plot(results["t_cycles"], h, color=colors[mk],
-                 linewidth=2, label=f"{mk} ({METALS[mk]['thickness']*1e6:.1f} um initial)")
+        ax1.plot(results["t_cycles"], h, color=colors[mk], linewidth=2,
+                 label=f"{mk} ({METALS[mk]['thickness']*1e6:.1f} µm initial)",
+                 **styles.get(mk, {}))
     ax1.set_xlabel("Charge Cycles")
-    ax1.set_ylabel("Remaining Thickness [um]")
+    ax1.set_ylabel("Remaining Thickness [µm]")
     ax1.set_title("Metal Thickness vs Charge Cycles")
     ax1.legend(fontsize=8)
     ax1.grid(True, alpha=0.3)
@@ -59,8 +62,16 @@ def plot_dissolution_map(save_path="assets/dissolution_temporal.png", dpi=200):
     for mk in metals_order:
         loss = results[f"{mk}_thickness_loss_pct"]
         ax2.plot(results["t_cycles"], loss, color=colors[mk],
-                 linewidth=2, label=mk)
+                 linewidth=2, label=mk, **styles.get(mk, {}))
     ax2.axhline(y=80, color="red", linestyle="--", linewidth=1, label="80% failure threshold")
+    for mk in metals_order:
+        loss = results[f"{mk}_thickness_loss_pct"]
+        gone = np.nonzero(loss >= 99.9)[0]
+        if gone.size:
+            ax2.annotate(f"{mk} layer fully consumed (100% loss)",
+                         xy=(results["t_cycles"][gone[0]], 100),
+                         xytext=(20, 90), fontsize=8,
+                         arrowprops=dict(arrowstyle="->", lw=0.8))
     ax2.set_xlabel("Charge Cycles")
     ax2.set_ylabel("Thickness Loss [%]")
     ax2.set_title("Cumulative Thickness Loss")
@@ -73,9 +84,9 @@ def plot_dissolution_map(save_path="assets/dissolution_temporal.png", dpi=200):
         R_ox = results[f"{mk}_R_oxide"]
         R_ox_normalized = R_ox / METALS[mk]["R_oxide_0"]
         ax3.plot(results["t_cycles"], R_ox_normalized, color=colors[mk],
-                 linewidth=2, label=mk)
+                 linewidth=2, label=mk, **styles.get(mk, {}))
     ax3.set_xlabel("Charge Cycles")
-    ax3.set_ylabel("Normalized Oxide Resistance (R/R_0)")
+    ax3.set_ylabel(r"Normalized Oxide Resistance $R/R_0$")
     ax3.set_title("Oxide Film Growth (Passivation Feedback)")
     ax3.legend(fontsize=8)
     ax3.grid(True, alpha=0.3)
@@ -93,7 +104,7 @@ def plot_dissolution_map(save_path="assets/dissolution_temporal.png", dpi=200):
                          linestyle="--", label="Mixed Potential")
 
     ax4.set_xlabel("SS304 Shell Area Multiplier")
-    ax4.set_ylabel("Galvanic Corrosion Current [uA]", color="crimson")
+    ax4.set_ylabel("Galvanic Corrosion Current [µA]", color="crimson")
     ax4_twin.set_ylabel("Mixed Potential [V vs SHE]", color="navy")
     ax4.set_title("Area Ratio Sensitivity (SS304 Shell)")
     ax4.legend(handles=[l1, l2], fontsize=8, loc="center right")
@@ -103,7 +114,7 @@ def plot_dissolution_map(save_path="assets/dissolution_temporal.png", dpi=200):
     lifetime_cycles, lifetime_years, critical_metal = estimate_port_lifetime(results)
     fig.text(0.5, -0.02,
              f"Uncalibrated model output, not a port lifetime: {critical_metal} "
-             f"passes 80% thickness loss at cycle {lifetime_cycles:.0f}",
+             f"passes 80% thickness loss at cycle {lifetime_cycles:.1f}",
              ha="center", fontsize=10, fontstyle="italic",
              bbox=dict(boxstyle="round", facecolor="lightyellow", alpha=0.8))
 

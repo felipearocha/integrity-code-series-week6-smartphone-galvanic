@@ -1,1 +1,1 @@
-# ICS2 Week 6 - Visualization Package
+# Week 6 - Visualization Package

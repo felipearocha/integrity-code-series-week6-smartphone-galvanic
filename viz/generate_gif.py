@@ -1,5 +1,5 @@
 """
-ICS2 Week 6 - Animated GIF V9
+Week 6 - Animated GIF V9
 
 ILLUSTRATIVE ONLY: random pit growth drawn for explanation. It is not solver
 output, and it shows Au eroding, which the model does not predict.
@@ -153,7 +153,7 @@ def generate_gif(save_path="assets/corrosion_evolution.gif", n_frames=90, fps=8)
         # Cu layer (always full)
         ax.fill_between(x_plot, cu_base_y / 10, ni_base_y / 10,
                           color="#CD7F32", alpha=0.9)
-        ax.text(7, (cu_base_y + ni_base_y) / 20, "Cu SUBSTRATE (35 um)",
+        ax.text(7, (cu_base_y + ni_base_y) / 20, "Cu SUBSTRATE (35 µm)",
                  ha="center", va="center", fontsize=9, color="white",
                  fontweight="bold", fontfamily="monospace", alpha=0.7)
 
@@ -174,7 +174,7 @@ def generate_gif(save_path="assets/corrosion_evolution.gif", n_frames=90, fps=8)
         # Ni label (only if visible)
         if np.mean(ni_front) > 5:
             ni_mid = ni_base_y / 10 + np.mean(ni_front) / 20
-            ax.text(7, ni_mid, "Ni BARRIER (2 um)",
+            ax.text(7, ni_mid, "Ni BARRIER (2 µm)",
                      ha="center", va="center", fontsize=9, color="white",
                      fontweight="bold", fontfamily="monospace", alpha=0.7)
 
@@ -192,7 +192,7 @@ def generate_gif(save_path="assets/corrosion_evolution.gif", n_frames=90, fps=8)
         # Au label
         if au_pct > 10:
             au_mid_y = np.mean(au_bottom_plot + au_front / 20)
-            ax.text(7, au_mid_y, "Au PLATING (0.5 um)",
+            ax.text(7, au_mid_y, "Au PLATING (0.5 µm)",
                      ha="center", va="center", fontsize=9, color="#333",
                      fontweight="bold", fontfamily="monospace")
 
@@ -250,7 +250,8 @@ def generate_gif(save_path="assets/corrosion_evolution.gif", n_frames=90, fps=8)
             arrow_offset = 0.6
 
         for ex in np.arange(1 + arrow_offset, 13, 2.0):
-            ey = (cu_base_y + ni_base_y) / 20
+            # lower quarter of the Cu band, clear of the layer label
+            ey = cu_base_y / 10 + 0.25 * (ni_base_y - cu_base_y) / 10
             ax.annotate("", xy=(ex + 0.8, ey), xytext=(ex, ey),
                          arrowprops=dict(arrowstyle="-|>", color="#44ff44",
                                           lw=1.2, alpha=0.25))
@@ -270,23 +271,23 @@ def generate_gif(save_path="assets/corrosion_evolution.gif", n_frames=90, fps=8)
         # === GAUGE BARS at bottom ===
         gauge_y_base = 0.8
         bar_data = [
-            ("Au", au_pct, "#FFD700"),
-            ("Ni", ni_exposed_pct, "#A0A0A8"),
-            ("Cu", cu_exposed_pct, "#CD7F32"),
+            ("Au", au_pct, "#FFD700", "intact"),
+            ("Ni", ni_exposed_pct, "#A0A0A8", "exposed"),
+            ("Cu", cu_exposed_pct, "#CD7F32", "exposed"),
         ]
-        for i, (label, pct, color) in enumerate(bar_data):
+        for i, (label, pct, color, what) in enumerate(bar_data):
             bx = 1.0 + i * 4.5
             # Background
-            ax.add_patch(Rectangle((bx, gauge_y_base), 3.5, 0.35,
+            ax.add_patch(Rectangle((bx, gauge_y_base), 3.0, 0.35,
                                      facecolor="#1a1a1a", edgecolor="#333",
                                      linewidth=0.5, zorder=20))
             # Fill
-            ax.add_patch(Rectangle((bx, gauge_y_base), 3.5 * pct / 100, 0.35,
+            ax.add_patch(Rectangle((bx, gauge_y_base), 3.0 * pct / 100, 0.35,
                                      facecolor=color, alpha=0.85, zorder=21))
             ax.text(bx - 0.1, gauge_y_base + 0.17, label,
                      ha="right", va="center", fontsize=8, color=color,
                      fontweight="bold", fontfamily="monospace", zorder=22)
-            ax.text(bx + 3.6, gauge_y_base + 0.17, f"{pct:.0f}%",
+            ax.text(bx + 3.1, gauge_y_base + 0.17, f"{pct:.0f}% {what}",
                      ha="left", va="center", fontsize=7, color="white",
                      fontfamily="monospace", zorder=22)
 
