@@ -164,6 +164,19 @@ class TestLaplaceChargingBias:
         assert wet.min() >= 0.0
         assert wet.max() <= self.BIAS
 
+    def test_phi_is_not_referenced_to_she(self):
+        """With no bias every metal sits at its own E_eq, so phi is 0 V everywhere,
+        while the mixed potential of the same metals is +0.53 V vs SHE. phi is
+        therefore in the solver frame and the figure must not label it vs SHE.
+        """
+        from viz.plot_potential_field import PHI_LABEL
+
+        zone_map = build_metal_zone_map()
+        phi, _, converged, _ = solve_laplace_2d(zone_map=zone_map, charging_bias=0.0)
+        assert converged
+        assert np.abs(phi[zone_map == "electrolyte"]).max() < 1e-9
+        assert "SHE" not in PHI_LABEL
+
     def test_current_density_bounded_by_ohmic_limit(self):
         """|j| cannot exceed kappa * bias over one grid spacing."""
         zone_map = build_metal_zone_map()

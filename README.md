@@ -5,7 +5,7 @@
 [![CI](https://github.com/felipearocha/integrity-code-series-week6-smartphone-galvanic/actions/workflows/ci.yml/badge.svg)](https://github.com/felipearocha/integrity-code-series-week6-smartphone-galvanic/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
-[![Tests: 43 passing](https://img.shields.io/badge/tests-43%20passing-brightgreen.svg)](tests)
+[![Tests: 44 passing](https://img.shields.io/badge/tests-44%20passing-brightgreen.svg)](tests)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20172479.svg)](https://doi.org/10.5281/zenodo.20172479)
 
 ## Executive Summary
@@ -42,7 +42,7 @@ outputs of an uncalibrated model.
 
 | Output | Value |
 |---|---|
-| Electrolyte potential range (Laplace, 5 V bias) | 0.96 to 3.35 V |
+| Electrolyte potential range (Laplace, 5 V bias) | 0.96 to 3.35 V vs solver ground |
 | Peak current density in the electrolyte (Laplace, 5 V bias) | 1.20e4 A/m² |
 | Mixed potential, no bias | +0.531 V vs SHE |
 | Galvanic current, no bias | 4.00e-6 A |
@@ -95,6 +95,9 @@ electrolyte potential satisfies current continuity:
 
 where $\phi$ is the electrolyte potential [V] and $\kappa$ the electrolyte conductivity
 [S/m]. For a thin film of thickness $\delta_e$, this reduces to a 2D problem on the port surface.
+$\phi$ is not referenced to SHE: it is measured from the solver ground, in which each metal is held at its own
+$E_{\mathrm{eq},k}$ (Au at $E_{\mathrm{eq}}$ + 5 V), so at zero bias $\phi = 0$ everywhere; the electrode potential vs SHE at a
+surface is $\phi_{\mathrm{metal},k} - \phi$.
 
 ### Scale 2: Micro (Metal Interfaces) - Butler-Volmer Kinetics
 
@@ -214,7 +217,7 @@ Thin film thickness: 10-500 micrometers (depending on humidity/lint trapping).
     |   |-- multi_scale_engine.py # Orchestrator coupling all scales
     |   |-- cybersecurity.py      # STRIDE threat model, audit logging, sensor validation
     |-- tests/
-    |   |-- test_all.py            # 43 tests: Butler-Volmer, Laplace, galvanic,
+    |   |-- test_all.py            # 44 tests: Butler-Volmer, Laplace, galvanic,
     |   |                          #   inverse, temporal, cybersecurity, integration
     |-- viz/
     |   |-- plot_potential_field.py
