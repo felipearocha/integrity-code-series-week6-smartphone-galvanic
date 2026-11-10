@@ -134,7 +134,7 @@ In the thin electrolyte film, assuming electroneutrality and negligible convecti
 $$
 \nabla\!\cdot\!\bigl(\kappa\,\nabla\phi\bigr) \;=\; 0
 $$
-with $\phi$ the electrolyte potential [V] and $\kappa$ the electrolyte conductivity [S/m]. For a film of thickness $\delta_e$ this reduces to a 2D problem on the port surface (8.34 mm × 2.56 mm USB-C receptacle cross section).
+with $\phi$ the electrolyte potential [V, vs solver ground, not vs SHE: each metal is held at its own $E_{\mathrm{eq},k}$, Au at $E_{\mathrm{eq}}$ + 5 V, so $\phi = 0$ at zero bias and the electrode potential vs SHE is $\phi_{\mathrm{metal},k} - \phi$] and $\kappa$ the electrolyte conductivity [S/m]. For a film of thickness $\delta_e$ this reduces to a 2D problem on the port surface (8.34 mm × 2.56 mm USB-C receptacle cross section).
 <p class="src">SOURCE: Laplace equation / current continuity for an ohmic electrolyte (standard electrochemistry, constant $\kappa$). Electrolyte: 0.5% NaCl sweat proxy, $\kappa \approx 1.5$ S/m [ASSUMED proxy].</p>
 <p>Code: <span class="code-ref">src/laplace_solver.py → solve_laplace_2d, extract_boundary_currents</span>.</p>
 </div>
@@ -230,7 +230,7 @@ $$
 </div>
 
 <footer>
-  Integrity Code Series — Week 6 · Felipe Rocha · 43 / 43 tests passing<br>
+  Integrity Code Series — Week 6 · Felipe Rocha · 44 / 44 tests passing<br>
   Browse the rendered panels in <code>assets/</code> for visual results.
 </footer>
 

@@ -23,6 +23,11 @@ from src.config import (NX, NY, DX, DY, PORT_WIDTH, PORT_HEIGHT,
                          METALS, build_metal_zone_map, SIM_PARAMS)
 from src.laplace_solver import solve_laplace_2d
 
+# phi is the electrolyte potential in the solver frame, where each metal is held
+# at E_eq (Au at E_eq + bias). It is not an electrode potential, so not vs SHE;
+# the electrode potential at a surface is phi_metal - phi.
+PHI_LABEL = r"$\phi$ [V vs solver ground]"
+
 
 def plot_potential_field(save_path="assets/hero_potential_current.png", dpi=200):
     """Generate the hero 2D potential and current density visualization."""
@@ -60,7 +65,7 @@ def plot_potential_field(save_path="assets/hero_potential_current.png", dpi=200)
     ax1 = axes[0]
     phi_plot = np.ma.masked_where(zone_map != "electrolyte", phi)
     im1 = ax1.pcolormesh(X, Y, phi_plot, cmap="RdBu_r", shading="auto")
-    cb1 = fig.colorbar(im1, ax=ax1, label="Potential [V vs SHE]", shrink=0.85)
+    cb1 = fig.colorbar(im1, ax=ax1, label=PHI_LABEL, shrink=0.85)
 
     # Fill metal zones with the legend colors so the legend matches the plot
     fill_colors = {"Au": "gold", "Ni": "silver", "SS304": "gray", "Cu": "peru"}

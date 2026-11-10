@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GIF labelled illustrative
 
 ### Fixed
+- Potential-field colorbar said "V vs SHE"; phi is measured from the solver ground (0 V everywhere at zero bias), now labelled "V vs solver ground"
 - Laplace boundary update: sign error caused divergence to 1e208 V with converged=True
 - Insulators apply the zero-flux condition instead of a fixed potential
 - MCMC keeps out-of-prior rejections in the chain (2000 steps, not 1890)
