@@ -40,7 +40,7 @@ def plot_inverse_posterior(save_path="assets/inverse_posterior.png", dpi=200):
 
     fig, axes = plt.subplots(3, 4, figsize=(16, 12), dpi=dpi)
     fig.suptitle("ICS2 Week 6: Bayesian Inverse Estimation of Exchange Current Densities\n"
-                 "Metropolis-Hastings MCMC | 4-Parameter Recovery from Synthetic Galvanic Data",
+                 "Metropolis-Hastings MCMC | 4-Parameter Estimation from Synthetic Galvanic Data",
                  fontsize=12, fontweight="bold")
 
     colors = ["#FFD700", "#A0A0A0", "#707070", "#B87333"]
@@ -128,7 +128,7 @@ def plot_inverse_posterior(save_path="assets/inverse_posterior.png", dpi=200):
     table.auto_set_font_size(False)
     table.set_fontsize(9)
     table.scale(1.0, 1.5)
-    ax_table.set_title("Parameter Recovery Summary", fontsize=10)
+    ax_table.set_title("Parameter Estimation Summary", fontsize=10)
 
     # Acceptance rate annotation
     fig.text(0.5, -0.02,

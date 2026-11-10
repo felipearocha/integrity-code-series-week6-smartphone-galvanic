@@ -38,6 +38,8 @@ def plot_potential_field(save_path="assets/hero_potential_current.png", dpi=200)
         tol=1e-4,
     )
 
+    assert converged, "Laplace solve did not converge; refusing to plot it"
+
     x = np.linspace(0, PORT_WIDTH * 1e3, NX)  # mm
     y = np.linspace(0, PORT_HEIGHT * 1e3, NY)  # mm
     X, Y = np.meshgrid(x, y)
@@ -75,16 +77,10 @@ def plot_potential_field(save_path="assets/hero_potential_current.png", dpi=200)
 
     # Right panel: Current density
     ax2 = axes[1]
-    j_plot = j_field.copy()
-    j_plot = np.where(np.isfinite(j_plot), j_plot, 0.0)
-    j_plot[j_plot < 1e-10] = 1e-10
-    j_plot = np.ma.masked_where(zone_map != "electrolyte", j_plot)
-
-    # Clamp to reasonable range for visualization
-    j_plot = np.clip(j_plot, 1e-6, 1e6)
+    j_plot = np.ma.masked_where(zone_map != "electrolyte", j_field)
 
     im2 = ax2.pcolormesh(X, Y, j_plot, cmap="hot_r", shading="auto",
-                          norm=LogNorm(vmin=1e-6, vmax=1e3))
+                          norm=LogNorm(vmin=j_plot.min(), vmax=j_plot.max()))
     cb2 = fig.colorbar(im2, ax=ax2, label=r"$|j|$ [A/m$^2$]", shrink=0.85)
 
     for mk in zone_colors:

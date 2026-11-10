@@ -102,8 +102,8 @@ def plot_dissolution_map(save_path="assets/dissolution_temporal.png", dpi=200):
     # Lifetime annotation
     lifetime_cycles, lifetime_years, critical_metal = estimate_port_lifetime(results)
     fig.text(0.5, -0.02,
-             f"Estimated Port Lifetime: {lifetime_cycles:.0f} cycles "
-             f"({lifetime_years:.1f} years) | Critical Metal: {critical_metal}",
+             f"Uncalibrated model output, not a port lifetime: {critical_metal} "
+             f"passes 80% thickness loss at cycle {lifetime_cycles:.0f}",
              ha="center", fontsize=10, fontstyle="italic",
              bbox=dict(boxstyle="round", facecolor="lightyellow", alpha=0.8))
 

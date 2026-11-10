@@ -19,7 +19,7 @@ import hashlib
 import json
 import time
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 # ==============================================================================
@@ -114,7 +114,7 @@ class AuditLogger:
         """
         entry = {
             "index": len(self.chain),
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).replace(tzinfo=None).isoformat() + "Z",
             "event_type": event_type,
             "user": user,
             "data": data,

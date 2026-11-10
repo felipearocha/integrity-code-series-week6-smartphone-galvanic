@@ -5,17 +5,21 @@ Solves:  div(kappa * grad(phi)) = 0  in 2D
 with nonlinear Butler-Volmer boundary conditions at metal surfaces
 and zero-flux conditions at insulator boundaries.
 
-Numerical method: Finite difference with iterative Gauss-Seidel
-and linearized BV boundary update (Picard iteration).
+Numerical method: Finite difference on the 5-point stencil, with the nonlinear
+Butler-Volmer boundary rows solved by step-limited Newton on the whole grid.
 
 Domain: USB-C receptacle cross-section (8.34 mm x 2.56 mm).
 """
 
 import numpy as np
+from scipy import sparse
+from scipy.sparse.linalg import spsolve
 from .config import (NX, NY, DX, DY, METALS, ELECTROLYTE,
                      SIM_PARAMS, T_DEFAULT, F_CONST, R_GAS)
 from .butler_volmer import butler_volmer_current, butler_volmer_derivative, effective_j0
 from .config import build_metal_zone_map
+
+NEWTON_MAX_STEP = 0.1  # Largest potential change per Newton iteration [V]
 
 
 def solve_laplace_2d(zone_map=None, kappa=None, phi_metals=None,
@@ -42,9 +46,9 @@ def solve_laplace_2d(zone_map=None, kappa=None, phi_metals=None,
     charging_bias : float
         Additional voltage applied to Au contact pins during charging [V].
     tol : float
-        Convergence tolerance for potential field.
+        Convergence tolerance: largest full Newton step [V].
     max_iter : int
-        Maximum Picard/Gauss-Seidel iterations.
+        Maximum Newton iterations.
 
     Returns
     -------
@@ -53,9 +57,9 @@ def solve_laplace_2d(zone_map=None, kappa=None, phi_metals=None,
     j_field : ndarray, shape (NY, NX)
         Current density magnitude at each point [A/m^2].
     converged : bool
-        Whether the solver converged.
+        True only if a full Newton step fell below tol.
     n_iter : int
-        Number of iterations to convergence.
+        Number of Newton iterations.
     """
     if zone_map is None:
         zone_map = build_metal_zone_map()
@@ -77,89 +81,87 @@ def solve_laplace_2d(zone_map=None, kappa=None, phi_metals=None,
         phi_metals = dict(phi_metals)
         phi_metals["Au"] = phi_metals.get("Au", METALS["Au"]["E_eq"]) + charging_bias
 
-    # Initialize potential field
-    phi = np.zeros((NY, NX))
-
-    # Set initial guess: average of metal potentials weighted by area
-    metal_pots = [v for v in phi_metals.values()]
-    phi[:, :] = np.mean(metal_pots)
-
-    # Identify electrolyte cells
+    # Each boundary cell closes against the mean of its electrolyte neighbours.
+    # Insulator cell:  phi_b - phi_e = 0                         (zero flux)
+    # Metal cell:      kappa * (phi_s - phi_e) / dn = j_BV(eta)  (anodic j > 0
+    #                  leaves the metal, so phi falls away from the surface)
     is_electrolyte = (zone_map == "electrolyte")
+    dn = min(DX, DY)
+    cx, cy = 1.0 / (DX * DX), 1.0 / (DY * DY)
+    n_cells = NY * NX
+    rows, cols, vals = [], [], []
+    rhs = np.zeros(n_cells)
+    phi = np.full(n_cells, np.mean(list(phi_metals.values())))
+    bv_cells, bv_phi_m, bv_E, bv_j0, bv_aa, bv_ac = [], [], [], [], [], []
 
-    # Precompute metal boundary info
-    metal_cells = {}
-    for mk in METALS:
-        mask = (zone_map == mk)
-        if np.any(mask):
-            metal_cells[mk] = mask
+    for r in range(NY):
+        for c in range(NX):
+            k = r * NX + c
+            zone = zone_map[r, c]
+            neighbours = [(r + dr, c + dc, w) for dr, dc, w in
+                          ((-1, 0, cy), (1, 0, cy), (0, -1, cx), (0, 1, cx))
+                          if 0 <= r + dr < NY and 0 <= c + dc < NX]
 
-    # Set metal boundary potentials as fixed (Dirichlet-like via BV coupling)
-    for mk, mask in metal_cells.items():
-        phi[mask] = phi_metals.get(mk, METALS[mk]["E_eq"])
+            if zone == "electrolyte":
+                for nr, nc, w in neighbours:
+                    rows += [k, k]
+                    cols += [nr * NX + nc, k]
+                    vals += [w, -w]
+                continue
 
-    # Iterative solver
+            wet = [nr * NX + nc for nr, nc, _ in neighbours if is_electrolyte[nr, nc]]
+            if zone in METALS:
+                metal = METALS[zone]
+                phi_m = phi_metals.get(zone, metal["E_eq"])
+                phi[k] = phi_m
+            if not wet:
+                rows.append(k)
+                cols.append(k)
+                vals.append(1.0)
+                rhs[k] = phi[k]
+                continue
+
+            g = kappa / dn
+            rows.append(k)
+            cols.append(k)
+            vals.append(g)
+            for m in wet:
+                rows.append(k)
+                cols.append(m)
+                vals.append(-g / len(wet))
+            if zone in METALS:
+                bv_cells.append(k)
+                bv_phi_m.append(phi_m)
+                bv_E.append(metal["E_eq"])
+                bv_j0.append(effective_j0(j0_overrides.get(zone, metal["j0"]),
+                                          R_oxides.get(zone, metal["R_oxide_0"]), T))
+                bv_aa.append(metal["alpha_a"])
+                bv_ac.append(metal["alpha_c"])
+
+    A = sparse.csc_matrix((vals, (rows, cols)), shape=(n_cells, n_cells))
+    bv_cells = np.array(bv_cells, dtype=int)
+    eta_0 = np.array(bv_phi_m) - np.array(bv_E)
+    bv_j0, bv_aa, bv_ac = np.array(bv_j0), np.array(bv_aa), np.array(bv_ac)
+
+    # Newton on the whole grid. The problem is monotone, so one solution exists;
+    # the step limit keeps the exponentials in range. Converged means a full,
+    # undamped Newton step smaller than tol.
     converged = False
     n_iter = 0
-
-    for iteration in range(max_iter):
-        phi_old = phi.copy()
-
-        # Gauss-Seidel update for interior electrolyte cells
-        for j in range(1, NY - 1):
-            for i in range(1, NX - 1):
-                if not is_electrolyte[j, i]:
-                    continue
-
-                # Standard 5-point stencil for Laplace equation
-                # (phi_i+1 + phi_i-1)/dx^2 + (phi_j+1 + phi_j-1)/dy^2 = 0
-                # => phi_ij = weighted average
-                coeff_x = 1.0 / (DX * DX)
-                coeff_y = 1.0 / (DY * DY)
-                denom = 2.0 * (coeff_x + coeff_y)
-
-                phi[j, i] = (coeff_x * (phi[j, i + 1] + phi[j, i - 1])
-                              + coeff_y * (phi[j + 1, i] + phi[j - 1, i])) / denom
-
-        # Update metal boundary cells using Butler-Volmer flux matching
-        for mk, mask in metal_cells.items():
-            metal = METALS[mk]
-            j0 = j0_overrides.get(mk, metal["j0"])
-            j0_eff = effective_j0(j0, R_oxides.get(mk, metal["R_oxide_0"]), T)
-            phi_m = phi_metals.get(mk, metal["E_eq"])
-
-            rows, cols = np.where(mask)
-            for r, c in zip(rows, cols):
-                # Find adjacent electrolyte cell
-                neighbors = []
-                for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                    nr, nc = r + dr, c + dc
-                    if 0 <= nr < NY and 0 <= nc < NX:
-                        if is_electrolyte[nr, nc]:
-                            neighbors.append(phi[nr, nc])
-
-                if len(neighbors) > 0:
-                    phi_elec_local = np.mean(neighbors)
-                    eta = phi_m - phi_elec_local - metal["E_eq"]
-
-                    # BV current at this point
-                    j_bv = butler_volmer_current(
-                        eta, j0_eff, metal["alpha_a"], metal["alpha_c"], T
-                    )
-
-                    # Update boundary phi to enforce flux continuity:
-                    # kappa * (phi_elec - phi_boundary) / dn = j_bv
-                    # This is a simplified linearized update
-                    dn = min(DX, DY)
-                    phi[r, c] = phi_elec_local - j_bv * dn / kappa
-
-        # Check convergence
-        max_change = np.max(np.abs(phi - phi_old))
-        n_iter = iteration + 1
-
-        if max_change < tol:
+    for n_iter in range(1, max_iter + 1):
+        eta = eta_0 - phi[bv_cells]
+        residual = A @ phi - rhs
+        residual[bv_cells] -= butler_volmer_current(eta, bv_j0, bv_aa, bv_ac, T)
+        slope = np.zeros(n_cells)
+        slope[bv_cells] = butler_volmer_derivative(eta, bv_j0, bv_aa, bv_ac, T)
+        step = spsolve((A + sparse.diags(slope, format="csc")).tocsc(), -residual)
+        size = np.max(np.abs(step))
+        phi += step * min(1.0, NEWTON_MAX_STEP / size) if size > 0 else 0.0
+        if size < tol:
             converged = True
             break
+
+    phi = phi.reshape(NY, NX)
 
     # Compute current density field from potential gradient
     j_field = np.zeros((NY, NX))
@@ -168,9 +170,6 @@ def solve_laplace_2d(zone_map=None, kappa=None, phi_metals=None,
             if is_electrolyte[j_idx, i_idx]:
                 dphidx = (phi[j_idx, i_idx + 1] - phi[j_idx, i_idx - 1]) / (2.0 * DX)
                 dphidy = (phi[j_idx + 1, i_idx] - phi[j_idx - 1, i_idx]) / (2.0 * DY)
-                # Clamp to prevent overflow
-                dphidx = np.clip(dphidx, -1e10, 1e10)
-                dphidy = np.clip(dphidy, -1e10, 1e10)
                 j_field[j_idx, i_idx] = kappa * np.sqrt(dphidx**2 + dphidy**2)
 
     return phi, j_field, converged, n_iter
@@ -227,9 +226,10 @@ def extract_boundary_currents(phi, zone_map, kappa=None, R_oxides=None,
 
             if len(neighbors_phi) > 0:
                 phi_elec = np.mean(neighbors_phi)
-                # Current from flux: j = -kappa * grad(phi) dot n
+                # j = -kappa * grad(phi) dot n, n pointing into the electrolyte;
+                # positive = anodic, matching butler_volmer_current
                 dn = min(DX, DY)
-                j_local = kappa * (phi_elec - phi[r, c]) / dn
+                j_local = kappa * (phi[r, c] - phi_elec) / dn
                 j_values.append(j_local)
 
         j_values = np.array(j_values) if len(j_values) > 0 else np.array([0.0])

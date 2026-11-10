@@ -6,13 +6,14 @@ Tests cover:
 2. Laplace solver: convergence, boundary conditions, conservation
 3. Galvanic coupling: charge conservation, area ratio effects
 4. Temporal evolution: mass conservation, passivation behavior
-5. Inverse estimation: parameter recovery, MCMC diagnostics
+5. Inverse estimation: priors, synthetic data, MCMC chain
 6. Cybersecurity: audit chain integrity, sensor validation
 7. Integration: full pipeline consistency
 """
 
 import numpy as np
 import pytest
+from scipy.optimize import brentq
 import sys
 import os
 
@@ -121,7 +122,7 @@ class TestLaplaceSolver:
         phi, j_field, converged, n_iter = solve_laplace_2d(
             zone_map=zone_map, max_iter=5000, tol=1e-4
         )
-        assert converged or n_iter <= 5000
+        assert converged
 
     def test_potential_field_is_finite(self):
         """No NaN or Inf in potential field."""
@@ -145,6 +146,74 @@ class TestLaplaceSolver:
 # ======================================================================
 # Galvanic Coupling Tests
 # ======================================================================
+
+class TestLaplaceChargingBias:
+    """The default run applies the charging bias to the Au pins."""
+
+    BIAS = SIM_PARAMS["charging_voltage"]
+
+    def test_biased_field_obeys_maximum_principle(self):
+        """Each metal pulls phi toward phi_m - E_eq: 0 V, or the bias on Au.
+
+        A harmonic field cannot leave that range.
+        """
+        zone_map = build_metal_zone_map()
+        phi, _, converged, _ = solve_laplace_2d(zone_map=zone_map, charging_bias=self.BIAS)
+        wet = phi[zone_map == "electrolyte"]
+        assert converged
+        assert wet.min() >= 0.0
+        assert wet.max() <= self.BIAS
+
+    def test_current_density_bounded_by_ohmic_limit(self):
+        """|j| cannot exceed kappa * bias over one grid spacing."""
+        zone_map = build_metal_zone_map()
+        _, j_field, _, _ = solve_laplace_2d(zone_map=zone_map, charging_bias=self.BIAS)
+        assert j_field.max() <= 1.5 * self.BIAS / min(DX, DY)
+
+    def test_unfinished_solve_is_not_reported_converged(self):
+        """Stopping early must return converged=False."""
+        _, _, converged, n_iter = solve_laplace_2d(charging_bias=self.BIAS, max_iter=3)
+        assert n_iter == 3
+        assert not converged
+
+    def test_one_dimensional_cell_matches_hand_solution(self):
+        """Au | electrolyte | SS304 reduces to a series circuit, solved by hand.
+
+        Ohm's law and Butler-Volmer at both faces carry the same current j:
+            j = kappa * (phi_L - phi_R) / L = j_Au(5 - phi_L) = -j_SS(-phi_R)
+        """
+        zone_map = np.full((NY, NX), "electrolyte", dtype=object)
+        zone_map[:, :2] = "Au"
+        zone_map[:, -2:] = "SS304"
+        zone_map[0, 2:-2] = "insulator"
+        zone_map[-1, 2:-2] = "insulator"
+
+        phi, _, converged, _ = solve_laplace_2d(zone_map=zone_map, charging_bias=self.BIAS)
+        assert converged
+
+        kappa, gap = 1.5, (NX - 3) * DX
+        au, ss = METALS["Au"], METALS["SS304"]
+        j0_au = effective_j0(au["j0"], au["R_oxide_0"])
+        j0_ss = effective_j0(ss["j0"], ss["R_oxide_0"])
+
+        def mismatch(phi_right):
+            j = -butler_volmer_current(-phi_right, j0_ss, 0.5, 0.5)
+            phi_left = phi_right + j * gap / kappa
+            return butler_volmer_current(self.BIAS - phi_left, j0_au, 0.5, 0.5) - j
+
+        phi_right = brentq(mismatch, 0.0, self.BIAS)
+        j = -butler_volmer_current(-phi_right, j0_ss, 0.5, 0.5)
+        assert phi[NY // 2, -2] == pytest.approx(phi_right, abs=1e-6)
+        assert phi[NY // 2, 1] == pytest.approx(phi_right + j * gap / kappa, abs=1e-6)
+
+        currents = extract_boundary_currents(phi, zone_map)
+        assert currents["Au"]["avg_j"] == pytest.approx(j, rel=1e-3)
+        assert currents["SS304"]["avg_j"] == pytest.approx(-j, rel=1e-3)
+
+        # Zero-flux walls leave no gradient along them
+        wet = phi[1:-1, 2:-2]
+        assert np.ptp(wet, axis=0).max() < 1e-9
+
 
 class TestGalvanicCoupling:
 
@@ -292,6 +361,15 @@ class TestInverseEstimation:
         chain, acc_rate, lls = run_mcmc(obs, n_samples=100, proposal_std=0.2)
         assert len(chain) > 0
         assert 0 <= acc_rate <= 1
+
+    def test_rejected_prior_proposals_stay_in_chain(self):
+        """Metropolis-Hastings repeats the state on any rejection.
+
+        Dropping out-of-prior steps biases the chain away from the prior bounds.
+        """
+        obs = generate_synthetic_observations(self.true_j0s, self.areas, n_obs=3)
+        chain, _, _ = run_mcmc(obs, n_samples=50, proposal_std=2.0)
+        assert len(chain) == 50
 
     def test_posterior_statistics(self):
         """Posterior stats should have required keys."""

@@ -2,3 +2,5 @@ linkedin/
 __pycache__/
 *.pyc
 .env
+assets/simulation_summary.json
+.pytest_cache/
